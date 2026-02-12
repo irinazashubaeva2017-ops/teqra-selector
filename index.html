@@ -6,7 +6,7 @@
     <title>TEQRA OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -30,27 +30,28 @@
 
             <div id="tab-add" class="tab-content active">
                 <div class="control-grid">
-                    <div class="input-group full-width"><label>Модель</label><input type="text" id="inp-title"></div>
-                    <div class="input-group"><label>Ціна ₴</label><input type="number" id="inp-price"></div>
+                    <div class="input-group full-width"><label>Модель пристрою</label><input type="text" id="inp-title" placeholder="Напр: MSI GF63 Thin"></div>
+                    <div class="input-group"><label>Ціна ₴</label><input type="number" id="inp-price" placeholder="18999"></div>
                     <div class="input-group">
+                        <label>Клас</label>
                         <select id="inp-type">
-                            <option value="gaming">GAMING</option>
-                            <option value="work">BUSINESS</option>
-                            <option value="ultrabook">ULTRA</option>
+                            <option value="gaming">🚀 GAMING</option>
+                            <option value="work">💼 BUSINESS</option>
+                            <option value="ultrabook">🛸 ULTRA</option>
                         </select>
                     </div>
-                    <div class="input-group full-width"><label>Залізо</label><input type="text" id="inp-specs"></div>
+                    <div class="input-group full-width"><label>Характеристики</label><input type="text" id="inp-specs" placeholder="i7 / RTX 3060 / 16GB"></div>
                     
                     <div class="input-group full-width">
                         <input type="file" id="inp-file" accept="image/*" style="display: none;">
                         <button class="cyber-btn-glitch" onclick="document.getElementById('inp-file').click()">
-                            <i class="fas fa-camera"></i> ОБРАТИ ФОТО
+                            <i class="fas fa-camera"></i> ОБРАТИ ФОТО З ГАЛЕРЕЇ
                         </button>
                         <div id="upload-status" class="status-msg"></div>
                         <input type="hidden" id="inp-img-url">
                     </div>
                 </div>
-                <button class="cyber-btn-glitch" id="add-btn" onclick="addProduct()" disabled>АКТИВУВАТИ</button>
+                <button class="cyber-btn-glitch main-action" id="add-btn" onclick="addProduct()" disabled>АКТИВУВАТИ ЛОТ</button>
             </div>
 
             <div id="tab-orders" class="tab-content">
@@ -69,26 +70,33 @@
                         <input type="text" id="order-address" placeholder="Відділення пошти">
                     </div>
 
-                    <label>МЕНЕДЖЕР:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="no-call">
+                        <label for="no-call">📦 Не дзвонити для підтвердження</label>
+                    </div>
+
+                    <label>ОБЕРІТЬ МЕНЕДЖЕРА:</label>
                     <div class="selector-row">
                         <button class="sel-btn active" id="btn-rina" onclick="setManager('Rina')">RINA</button>
                         <button class="sel-btn" id="btn-misha" onclick="setManager('Misha')">MISHA</button>
                     </div>
 
-                    <button class="cyber-btn-glitch" onclick="confirmOrder()">ПІДТВЕРДИТИ</button>
-                    <button class="close-txt" onclick="closeOrder()">Скасувати</button>
+                    <button class="cyber-btn-glitch" onclick="confirmOrder()">ПІДТВЕРДИТИ ЗАМОВЛЕННЯ</button>
+                    <button class="close-txt" onclick="closeOrder()">Повернутись до каталогу</button>
                 </div>
 
                 <div id="order-success" style="display:none;">
                     <i class="fas fa-check-circle success-icon"></i>
                     <h2 class="neon-txt">ПРИЙНЯТО!</h2>
-                    <p>Наш менеджер скоро зв’яжеться з вами для уточнення та перевірки інформації.</p>
+                    <p>Наш менеджер скоро зв’яжеться з вами для уточнення інформації.</p>
                     <button class="cyber-btn-small" style="width:100%" onclick="closeOrder()">ЗРОЗУМІЛО</button>
                 </div>
             </div>
         </div>
 
-        <div id="catalog" class="grid-container"></div>
+        <div id="catalog" class="grid-container">
+             <div class="system-msg">Завантаження терміналів...</div>
+        </div>
     </div>
 
     <script type="module">
@@ -112,11 +120,12 @@
 
         let currentOrder = { title: '', manager: 'Rina' };
 
-        // ЗАВАНТАЖЕННЯ ЧЕРЕЗ IMGBB
+        // ЗАВАНТАЖЕННЯ ФОТО ЧЕРЕЗ IMGBB
         document.getElementById('inp-file').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            document.getElementById('upload-status').innerText = "⏳ Вантажимо...";
+            document.getElementById('upload-status').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вантажимо у хмару...';
+            
             const formData = new FormData();
             formData.append('image', file);
             
@@ -124,22 +133,27 @@
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: formData });
                 const result = await res.json();
                 document.getElementById('inp-img-url').value = result.data.url;
-                document.getElementById('upload-status').innerText = "✅ Готово";
+                document.getElementById('upload-status').innerHTML = '<span style="color:#00f3ff">✅ Фото готове до активації</span>';
                 document.getElementById('add-btn').disabled = false;
-            } catch (err) { tg.showAlert("Помилка фото"); }
+            } catch (err) { 
+                document.getElementById('upload-status').innerText = "❌ Помилка завантаження";
+            }
         });
 
+        // ПІДТВЕРДЖЕННЯ ЗАМОВЛЕННЯ
         window.confirmOrder = async () => {
             const fio = document.getElementById('order-fio').value;
             const phone = document.getElementById('order-phone').value;
-            const city = document.getElementById('order-city').value;
-            const addr = document.getElementById('order-address').value;
+            const noCall = document.getElementById('no-call').checked;
 
-            if(!fio || !phone) return tg.showAlert("Вкажіть контакти!");
+            if(!fio || !phone) return tg.showAlert("⚠️ Введіть контактні дані!");
 
             await push(ordersRef, {
                 ...currentOrder,
-                client: fio, phone: phone, addr: `${city}, ${addr}`,
+                client: fio,
+                phone: phone,
+                addr: document.getElementById('order-city').value + ", " + document.getElementById('order-address').value,
+                noCall: noCall ? "✅ Не дзвонити" : "📞 Потрібен дзвінок",
                 user: tg.initDataUnsafe?.user?.username || 'user',
                 date: new Date().toLocaleString()
             });
@@ -149,7 +163,30 @@
             tg.HapticFeedback.notificationOccurred('success');
         };
 
-        // КЕРУВАННЯ
+        // ЛОГІКА ДОДАВАННЯ ТОВАРУ
+        window.addProduct = async () => {
+            const title = document.getElementById('inp-title').value;
+            const price = document.getElementById('inp-price').value;
+            const img = document.getElementById('inp-img-url').value;
+
+            if(!title || !price || !img) return tg.showAlert("⚠️ Заповніть дані та оберіть фото!");
+
+            await push(productsRef, {
+                title,
+                price,
+                specs: document.getElementById('inp-specs').value,
+                type: document.getElementById('inp-type').value,
+                image: img,
+                date: Date.now()
+            });
+            
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            document.getElementById('upload-status').innerText = "";
+            toggleAdminPanel();
+            tg.showAlert("🚀 Лот активовано в системі!");
+        };
+
+        // КЕРУВАННЯ ТА ВІДОБРАЖЕННЯ
         window.toggleAdminPanel = () => document.getElementById('admin-panel').classList.toggle('open');
         window.switchTab = (t) => {
             document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
@@ -173,7 +210,7 @@
             const data = s.val();
             if(data) Object.keys(data).reverse().forEach(k => {
                 const o = data[k];
-                list.innerHTML += `<div class="order-item"><b>${o.title}</b><br>👤 ${o.client}<br>📞 ${o.phone}<br>📍 ${o.addr}<br>👨‍💼 Менеджер: ${o.manager}<br><button class="del-order" onclick="remove(ref(db, 'orders/${k}'))">ГОТОВО</button></div>`;
+                list.innerHTML += `<div class="order-item"><b>${o.title}</b><br>👤 ${o.client} (${o.phone})<br>📍 ${o.addr}<br>🛰 ${o.noCall}<br>👨‍💼 Менеджер: ${o.manager}<br><button class="del-order" onclick="remove(ref(db, 'orders/${k}'))">АРХІВУВАТИ</button></div>`;
             });
         });
 
