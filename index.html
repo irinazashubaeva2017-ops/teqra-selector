@@ -1,205 +1,224 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>TEQRA STORE</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEQRA</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
-<body onclick="hideKeyboard()">
-    <div class="bg-overlay"></div>
+<body>
 
-    <div class="app-container">
-        <header>
-            <div class="brand-box">
-                <h1 class="logo">TEQRA<span class="dot">.</span>МАГАЗИН</h1>
-                <div class="status-online">ЗВ'ЯЗОК ВСТАНОВЛЕНО</div>
-            </div>
-            <button id="admin-toggle" class="cmd-btn" style="display: none;" onclick="toggleAdminPanel(); event.stopPropagation();">
-                <i class="fas fa-terminal"></i> ПАНЕЛЬ
-            </button>
-        </header>
+<div class="app">
 
-        <div class="filters-bar">
-            <button class="filter-btn active" onclick="setFilter('all', this)">💠 ВСІ</button>
-            <button class="filter-btn" onclick="setFilter('gaming', this)">🚀 ІГРОВІ</button>
-            <button class="filter-btn" onclick="setFilter('work', this)">💼 ОФІСНІ</button>
-        </div>
+<header>
+<h1>TEQRA</h1>
+<div class="filters">
+<button onclick="filterCategory('all')">УСІ</button>
+<button onclick="filterCategory('gaming')">ІГРОВІ</button>
+<button onclick="filterCategory('office')">ОФІСНІ</button>
+</div>
+</header>
 
-        <div id="catalog" class="catalog-grid">
-            </div>
-    </div>
+<div id="catalog" class="catalog"></div>
 
-    <div id="admin-panel" class="side-panel">
-        <div class="panel-blur" onclick="toggleAdminPanel()"></div>
-        <div class="panel-content" onclick="event.stopPropagation()">
-            <div class="panel-handle"></div>
-            <div class="admin-tabs">
-                <button class="tab-link active" onclick="switchTab('add')">НОВИЙ ЛОТ</button>
-                <button class="tab-link" onclick="switchTab('orders')">ЗАМОВЛЕННЯ</button>
-            </div>
+</div>
 
-            <div id="tab-add" class="tab-pane active">
-                <div class="cyber-form">
-                    <label>Назва моделі</label>
-                    <input type="text" id="inp-title" placeholder="Напр: MSI GF63 Thin">
-                    <div class="row">
-                        <div style="flex:1">
-                            <label>Ціна ₴</label>
-                            <input type="number" id="inp-price" placeholder="18999">
-                        </div>
-                        <div style="flex:1">
-                            <label>Категорія</label>
-                            <select id="inp-type">
-                                <option value="gaming">ІГРОВИЙ</option>
-                                <option value="work">ОФІСНИЙ</option>
-                                <option value="ultrabook">УЛЬТРАБУК</option>
-                            </select>
-                        </div>
-                    </div>
-                    <label>Характеристики</label>
-                    <input type="text" id="inp-specs" placeholder="i7 / RTX 4060 / 16GB">
-                    
-                    <input type="file" id="inp-file" accept="image/*" style="display: none;">
-                    <button class="upload-trigger" onclick="document.getElementById('inp-file').click()">
-                        <i class="fas fa-camera"></i> ОБРАТИ ФОТО З ГАЛЕРЕЇ
-                    </button>
-                    <div id="upload-status" class="status-text"></div>
-                    <input type="hidden" id="inp-img-url">
-                    
-                    <button class="action-btn" id="add-btn" onclick="addProduct()" disabled>АКТИВУВАТИ ЛОТ</button>
-                </div>
-            </div>
+<!-- Кнопка адміна -->
+<button id="adminBtn" class="admin-btn">>_CMD</button>
 
-            <div id="tab-orders" class="tab-pane">
-                <div id="orders-list" class="orders-feed"></div>
-            </div>
-        </div>
-    </div>
+<!-- Адмін шторка -->
+<div id="adminPanel" class="admin-panel">
+<div class="panel-content">
 
-    <div id="order-form" class="modal-overlay" style="display:none;">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <h3>ДАНІ ЗАМОВЛЕННЯ</h3>
-            <div class="input-stack">
-                <input type="text" id="order-fio" placeholder="Ваше Прізвище та Ім'я">
-                <input type="tel" id="order-phone" placeholder="Номер телефону">
-                <input type="text" id="order-city" placeholder="Місто">
-                <input type="text" id="order-address" placeholder="Відділення пошти">
-            </div>
-            <div class="check-box">
-                <input type="checkbox" id="no-call">
-                <label for="no-call">🤫 Не дзвонити (все вірно, чекаю в ТГ)</label>
-            </div>
-            <button class="action-btn" onclick="confirmOrder()">ПІДТВЕРДИТИ</button>
-            <button class="cancel-link" onclick="closeOrder()">Повернутися</button>
-        </div>
-    </div>
+<h2>АДМІН ПАНЕЛЬ</h2>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+<div class="tabs">
+<button onclick="showTab('newLot')">НОВИЙ ЛОТ</button>
+<button onclick="showTab('orders')">ЗАМОВЛЕННЯ</button>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCuYjKFAsKbdu_PLI4OkxiW6Wz-Yhq_q44",
-            databaseURL: "https://catalog-b9cc2-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "catalog-b9cc2"
-        };
+<div id="newLot" class="tab">
+<input id="lotTitle" placeholder="Назва">
+<input id="lotPrice" placeholder="Ціна">
+<select id="lotCategory">
+<option value="gaming">ІГРОВІ</option>
+<option value="office">ОФІСНІ</option>
+</select>
+<textarea id="lotSpecs" placeholder="Характеристики"></textarea>
+<input type="file" id="lotImage">
+<button onclick="uploadImage()">ОБРАТИ ФОТО З ГАЛЕРЕЇ</button>
+<button onclick="addLot()">ДОДАТИ</button>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const productsRef = ref(db, 'laptops');
-        const ordersRef = ref(db, 'orders');
-        const admins = [7255848995, 921509542];
-        const tg = window.Telegram.WebApp;
-        const IMGBB_KEY = "70bb1de10d70f62410bc55ddd2a4fd0e";
+<div id="orders" class="tab hidden">
+<div id="ordersList"></div>
+</div>
 
-        window.hideKeyboard = () => { if(document.activeElement) document.activeElement.blur(); };
-        window.toggleAdminPanel = () => { hideKeyboard(); document.getElementById('admin-panel').classList.toggle('active'); };
-        
-        window.switchTab = (t) => {
-            document.querySelectorAll('.tab-link, .tab-pane').forEach(el => el.classList.remove('active'));
-            document.querySelector(`[onclick="switchTab('${t}')"]`).classList.add('active');
-            document.getElementById(`tab-${t}`).classList.add('active');
-        };
+</div>
+</div>
 
-        // Завантаження фото
-        document.getElementById('inp-file').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('upload-status').innerText = "⏳ ВАНТАЖИМО ФОТО...";
-            const fd = new FormData(); fd.append('image', file);
-            try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST', body:fd});
-                const r = await res.json();
-                document.getElementById('inp-img-url').value = r.data.url;
-                document.getElementById('upload-status').innerText = "✅ ГОТОВО";
-                document.getElementById('add-btn').disabled = false;
-            } catch { document.getElementById('upload-status').innerText = "ПОМИЛКА"; }
-        });
+<!-- Форма замовлення -->
+<div id="orderModal" class="modal hidden">
+<div class="modal-content">
+<h2>ОФОРМЛЕННЯ</h2>
+<input id="clientName" placeholder="ПІБ">
+<input id="clientPhone" placeholder="Телефон">
+<input id="clientCity" placeholder="Місто">
+<input id="clientPost" placeholder="Відділення пошти">
+<label><input type="checkbox" id="noCall"> 🤫 Не дзвонити для підтвердження</label>
 
-        // Каталог
-        onValue(productsRef, (s) => {
-            const catalog = document.getElementById('catalog');
-            catalog.innerHTML = "";
-            const data = s.val();
-            if(!data) {
-                catalog.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-ghost" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
-                    <h3>ТУТ ПОКИ ПУСТО...</h3>
-                    <p>Ноутбуки ще летять до нас. <br>Спробуй зайти через 15 хвилин!</p>
-                </div>`;
-                return;
-            }
-            Object.keys(data).reverse().forEach(k => {
-                const p = data[k];
-                catalog.innerHTML += `
-                <div class="item-card">
-                    <div class="img-wrap"><img src="${p.image}"></div>
-                    <div class="item-info">
-                        <h3>${p.title}</h3>
-                        <p>${p.specs}</p>
-                        <div class="price-row"><span class="price-val">${p.price} ₴</span>
-                        <button class="buy-button" onclick="openOrder('${p.title}')">КУПИТИ</button></div>
-                    </div>
-                </div>`;
-            });
-        });
+<select id="manager">
+<option value="RINA">RINA</option>
+<option value="MISHA">MISHA</option>
+</select>
 
-        window.addProduct = async () => {
-            hideKeyboard();
-            const title = document.getElementById('inp-title').value;
-            const price = document.getElementById('inp-price').value;
-            const img = document.getElementById('inp-img-url').value;
-            if(!title || !price || !img) return;
-            await push(productsRef, { title, price, specs: document.getElementById('inp-specs').value, type: document.getElementById('inp-type').value, image: img, date: Date.now() });
-            document.querySelectorAll('.cyber-form input').forEach(i => i.value = '');
-            toggleAdminPanel();
-        };
+<button onclick="confirmOrder()">ПІДТВЕРДИТИ</button>
+</div>
+</div>
 
-        window.openOrder = (t) => { window.targetTitle = t; document.getElementById('order-form').style.display = 'flex'; };
-        window.closeOrder = () => document.getElementById('order-form').style.display = 'none';
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-        window.confirmOrder = async () => {
-            hideKeyboard();
-            const fio = document.getElementById('order-fio').value;
-            const phone = document.getElementById('order-phone').value;
-            if(!fio || !phone) return tg.showAlert("ЗАПОВНІТЬ ДАНІ");
-            await push(ordersRef, {
-                title: window.targetTitle, client: fio, phone: phone,
-                addr: document.getElementById('order-city').value + " " + document.getElementById('order-address').value,
-                noCall: document.getElementById('no-call').checked,
-                user: tg.initDataUnsafe?.user?.username || 'user',
-                date: new Date().toLocaleString()
-            });
-            tg.showAlert("ЗАМОВЛЕННЯ ПРИЙНЯТО! Скоро напишемо.");
-            closeOrder();
-        };
+const admins = [7255848995, 921509542];
 
-        if (admins.includes(tg.initDataUnsafe?.user?.id)) document.getElementById('admin-toggle').style.display = 'flex';
-    </script>
+if (!admins.includes(tg.initDataUnsafe.user?.id)) {
+document.getElementById("adminBtn").style.display = "none";
+}
+
+document.getElementById("adminBtn").onclick = () => {
+document.getElementById("adminPanel").classList.toggle("open");
+};
+
+document.body.addEventListener("click", (e) => {
+if (!e.target.closest("input, textarea")) {
+document.activeElement.blur();
+}
+});
+
+const firebaseConfig = {
+apiKey: "AIzaSyCuYjKFAsKbdu_PLI4OkxiW6Wz-Yhq_q44",
+databaseURL: "https://catalog-b9cc2-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "catalog-b9cc2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function filterCategory(cat) {
+loadCatalog(cat);
+}
+
+function loadCatalog(category="all") {
+db.ref("lots").on("value", snap => {
+const data = snap.val();
+const catalog = document.getElementById("catalog");
+catalog.innerHTML = "";
+
+if (!data) {
+catalog.innerHTML = `
+<div class="empty">
+<div class="ghost">👻</div>
+<h2>СЕКТОР ПОРОЖНІЙ</h2>
+</div>`;
+return;
+}
+
+Object.keys(data).forEach(id => {
+const item = data[id];
+if (category === "all" || item.category === category) {
+catalog.innerHTML += `
+<div class="card">
+<img src="${item.image}">
+<h3>${item.title}</h3>
+<p>${item.specs}</p>
+<div class="price">${item.price} ₴</div>
+<button onclick="openOrder('${id}')">КУПИТИ</button>
+</div>`;
+}
+});
+});
+}
+
+function uploadImage() {
+const file = document.getElementById("lotImage").files[0];
+const formData = new FormData();
+formData.append("image", file);
+
+fetch("https://api.imgbb.com/1/upload?key=70bb1de10d70f62410bc55ddd2a4fd0e", {
+method: "POST",
+body: formData
+})
+.then(res => res.json())
+.then(data => {
+window.uploadedImage = data.data.url;
+});
+}
+
+function addLot() {
+const lot = {
+title: lotTitle.value,
+price: lotPrice.value,
+category: lotCategory.value,
+specs: lotSpecs.value,
+image: window.uploadedImage || ""
+};
+db.ref("lots").push(lot);
+alert("ДОДАНО");
+}
+
+function openOrder(id) {
+window.currentLot = id;
+orderModal.classList.remove("hidden");
+}
+
+function confirmOrder() {
+const order = {
+lot: window.currentLot,
+name: clientName.value,
+phone: clientPhone.value,
+city: clientCity.value,
+post: clientPost.value,
+noCall: noCall.checked,
+manager: manager.value,
+status: "active"
+};
+db.ref("orders").push(order);
+orderModal.classList.add("hidden");
+alert("ЗАМОВЛЕННЯ НАДІСЛАНО");
+}
+
+function showTab(tab) {
+document.querySelectorAll(".tab").forEach(t => t.classList.add("hidden"));
+document.getElementById(tab).classList.remove("hidden");
+if (tab === "orders") loadOrders();
+}
+
+function loadOrders() {
+db.ref("orders").on("value", snap => {
+const data = snap.val();
+ordersList.innerHTML = "";
+if (!data) return;
+Object.keys(data).forEach(id => {
+const o = data[id];
+ordersList.innerHTML += `
+<div class="order">
+<p>${o.name}</p>
+<p>${o.phone}</p>
+<p>${o.city}</p>
+<p>${o.manager}</p>
+</div>`;
+});
+});
+}
+
+loadCatalog();
+</script>
+
 </body>
 </html>
