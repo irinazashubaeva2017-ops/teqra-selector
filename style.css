@@ -1,51 +1,244 @@
-body {
-    background-color: #0d0d0d;
-    color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
+:root {
+    --primary: #007AFF;    /* Насыщенный синий */
+    --accent: #5AC8FA;     /* Нежный голубой */
+    --bg: #F0F2F5;         /* Светлый фон всей страницы */
+    --card-bg: #FFFFFF;    /* Белый цвет карточек */
+    --text: #1C1C1E;       /* Почти черный для текста */
+    --text-sec: #8E8E93;   /* Серый для характеристик */
+    --danger: #FF3B30;     /* Красный для удаления */
+    --success: #34C759;    /* Зеленый */
 }
 
-#app {
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 15px;
+    padding-bottom: 90px; /* Чтобы кнопка админа не перекрывала контент */
+}
+
+/* Шапка бренда TEQRA */
+header {
     text-align: center;
-    padding: 20px;
-    border: 1px solid #333;
-    border-radius: 15px;
-    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.1); /* Легкое свечение в стиле Soul Red */
+    margin-bottom: 25px;
 }
 
 .logo {
-    color: #e60000; /* Тот самый красный акцент */
-    letter-spacing: 5px;
-    margin-bottom: 5px;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 3px;
 }
 
 .subtitle {
+    color: var(--text-sec);
     font-size: 0.8rem;
-    color: #888;
     text-transform: uppercase;
-    margin-bottom: 30px;
+    letter-spacing: 1px;
+    margin-top: 5px;
 }
 
-.option-btn {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    margin: 10px 0;
-    background: transparent;
-    border: 1px solid #e60000;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
+/* Стили фильтров */
+.filters-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+}
+.filters-container::-webkit-scrollbar { display: none; }
+
+.filter-select {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background: var(--card-bg);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    white-space: nowrap;
+    outline: none;
 }
 
-.option-btn:active {
-    background: #e60000;
+/* Сетка и карточки товаров */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease;
+    position: relative;
+    border: 1px solid rgba(0, 122, 255, 0.05);
+}
+
+.product-card:active {
     transform: scale(0.98);
+}
+
+.card-image-container {
+    position: relative;
+    height: 190px;
+    background: #f9f9f9;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Бейджи категорий */
+.badge {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+}
+.badge-game { background: #FF2D55; } /* Для MSI и игровых */
+.badge-work { background: var(--primary); } /* Для офисных */
+.badge-ultra { background: #5856D6; } /* Для ультрабуков */
+
+.delete-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--danger);
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Инфо блок карточки */
+.card-info {
+    padding: 18px;
+}
+
+.product-title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.product-specs {
+    font-size: 0.85rem;
+    color: var(--text-sec);
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.buy-btn {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Круглая кнопка добавления (+) */
+.fab-btn {
+    width: 60px; height: 60px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    font-size: 24px;
+    box-shadow: 0 5px 15px rgba(0, 122, 255, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+
+/* Модальное окно (Админка) */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: white;
+    width: 88%;
+    max-width: 400px;
+    border-radius: 24px;
+    padding: 25px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; }
+.form-group input, .form-group select {
+    width: 100%; padding: 12px;
+    border: 1px solid #E5E5EA; border-radius: 12px;
+    background: #F2F2F7;
+    box-sizing: border-box;
+    font-size: 1rem;
+    outline: none;
+}
+
+.btn-primary {
+    width: 100%; padding: 16px;
+    background: var(--primary); color: white;
+    border: none; border-radius: 14px;
+    font-size: 1rem; font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Плавные анимации */
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading, .empty-state {
+    text-align: center;
+    padding: 50px;
+    color: var(--text-sec);
+    font-size: 0.9rem;
 }
