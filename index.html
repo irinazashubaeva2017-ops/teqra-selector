@@ -3,83 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TEQRA Store</title>
+    <title>TEQRA Space Catalog</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <header>
         <h1 class="logo">TEQRA</h1>
-        <p class="subtitle">Laptop Store & Service</p>
+        <p class="subtitle">Future Tech. Delivered.</p>
+        <button id="admin-toggle-btn" class="admin-btn" style="display: none;" onclick="toggleAdminPanel()">
+            ⚡ Панель керування
+        </button>
     </header>
 
+    <div id="admin-dashboard" class="admin-panel-container" style="display: none;">
+        <div class="admin-header">
+            <h2 class="panel-title">Створення лота</h2>
+        </div>
+        <div class="admin-form">
+             <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Модель пристрою</label>
+                    <input type="text" id="inp-title" placeholder="Напр: MSI Cyborg 15 A12V">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Ціна (₴)</label>
+                    <input type="number" id="inp-price" placeholder="45000">
+                </div>
+            </div>
+
+            <div class="form-row">
+                 <div class="form-group">
+                    <label>Клас</label>
+                    <select id="inp-type">
+                        <option value="gaming">🚀 Gaming (Ігровий)</option>
+                        <option value="work">💼 Business (Робочий)</option>
+                        <option value="ultrabook">🛸 Ultrabook (Тонкий)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Специфікації (CPU / GPU / RAM)</label>
+                    <input type="text" id="inp-specs" placeholder="i7-12650H / RTX 4060 / 16GB">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Фото (Посилання)</label>
+                <input type="text" id="inp-img" placeholder="https://...">
+            </div>
+
+            <button class="btn-submit" onclick="addProduct()">АКТИВУВАТИ ЛОТ В БАЗІ</button>
+        </div>
+    </div>
     <div class="filters-container">
         <select id="filter-type" class="filter-select" onchange="renderProducts()">
-            <option value="all">💻 Всі ноутбуки</option>
-            <option value="gaming">🎮 Ігрові (Gaming)</option>
-            <option value="work">💼 Робота (Office)</option>
-            <option value="ultrabook">✈️ Ультрабуки</option>
+            <option value="all">💠 Всі термінали</option>
+            <option value="gaming">🚀 Gaming Class</option>
+            <option value="work">💼 Business Class</option>
+            <option value="ultrabook">🛸 Ultrabooks</option>
         </select>
         <select id="filter-price" class="filter-select" onchange="renderProducts()">
-            <option value="all">💰 Будь-яка ціна</option>
-            <option value="cheap">До 10 000 грн</option>
-            <option value="mid">10 - 20 000 грн</option>
-            <option value="expensive">Від 20 000 грн</option>
+            <option value="all">💰 Будь-який бюджет</option>
+            <option value="cheap">До 10k</option>
+            <option value="mid">10k - 25k</option>
+            <option value="expensive">Від 25k</option>
         </select>
     </div>
 
     <div id="catalog" class="catalog-grid">
         <div class="loading">
-            <i class="fas fa-circle-notch fa-spin"></i> Завантаження бази TEQRA...
-        </div>
-    </div>
-
-    <div id="admin-panel" style="display: none;">
-        <button class="fab-btn" onclick="openAddModal()">
-            <i class="fas fa-plus"></i>
-        </button>
-    </div>
-
-    <div id="add-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Додати ноутбук</h2>
-                <span class="close-btn" onclick="closeAddModal()">&times;</span>
-            </div>
-            
-            <div class="form-group">
-                <label>Назва моделі</label>
-                <input type="text" id="inp-title" placeholder="Напр: MSI GF63 Thin">
-            </div>
-            
-            <div class="form-group">
-                <label>Категорія</label>
-                <select id="inp-type">
-                    <option value="gaming">🎮 Ігровий</option>
-                    <option value="work">💼 Офісний</option>
-                    <option value="ultrabook">✈️ Ультрабук</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Характеристики (Процесор, Відяха)</label>
-                <input type="text" id="inp-specs" placeholder="i7-8750H / GTX 1060 / 16GB">
-            </div>
-
-            <div class="form-group">
-                <label>Ціна (грн)</label>
-                <input type="number" id="inp-price" placeholder="18999">
-            </div>
-            
-            <div class="form-group">
-                <label>Посилання на фото</label>
-                <input type="text" id="inp-img" placeholder="https://...">
-                <small style="color:#888; font-size:10px;">Скопіюй посилання на фото з Telegram</small>
-            </div>
-
-            <button class="btn-primary" onclick="addProduct()">Зберегти в базу</button>
+            <i class="fas fa-satellite-dish fa-spin"></i> Встановлення зв'язку з базою TEQRA...
         </div>
     </div>
 
@@ -88,10 +84,9 @@
         import { getDatabase, ref, push, onValue, remove } 
         from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // === ТВОЙ КОНФИГ (Уже заполнен) ===
+        // === ВСТАВ СЮДА СВОЙ API KEY ===
         const firebaseConfig = {
-            apiKey: "AIzaSyCuYjKFAsKbdu_PLI4OkxiW6Wz-Yhq_q44",
-            authDomain: "catalog-b9cc2.firebaseapp.com",
+            apiKey: "ВСТАВЬ_СВОЙ_API_KEY", // <--- ТУТ
             databaseURL: "https://catalog-b9cc2-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "catalog-b9cc2",
             storageBucket: "catalog-b9cc2.firebasestorage.app",
@@ -103,50 +98,51 @@
         const db = getDatabase(app);
         const productsRef = ref(db, 'laptops');
 
-        // === ВАШИ ID (Доступ только у вас) ===
+        // === ВАШІ ID ===
         const admins = [
-            7255848995, // Ты
-            921509542   // Миша
+            7255848995, // Ти
+            921509542   // Міша
         ];
 
-        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
+        tg.expand();
+        tg.setHeaderColor('#0a0a12'); // Чорний колір шапки Телеграм
+        tg.setBackgroundColor('#0a0a12');
 
-        // Проверка Админа
+        let isAdmin = false;
+
         function checkAdmin() {
             const userId = tg.initDataUnsafe?.user?.id;
-            // Если ID пользователя есть в списке админов
             if (admins.includes(userId)) {
-                document.getElementById('admin-panel').style.display = 'block';
+                isAdmin = true;
+                // Показуємо кнопку перемикання адмінки
+                document.getElementById('admin-toggle-btn').style.display = 'inline-block';
             }
         }
         checkAdmin();
 
-        // Загрузка товаров
+        // Функція відкриття/закриття панелі
+        window.toggleAdminPanel = function() {
+            const panel = document.getElementById('admin-dashboard');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                panel.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
         let allProducts = [];
-        
         onValue(productsRef, (snapshot) => {
             const data = snapshot.val();
-            const catalog = document.getElementById('catalog');
-            catalog.innerHTML = "";
             allProducts = [];
-
-            if (!data) {
-                catalog.innerHTML = '<div class="empty-state">Поки що немає товарів...</div>';
-                return;
+            if (data) {
+                Object.keys(data).forEach(key => allProducts.push({ id: key, ...data[key] }));
             }
-
-            Object.keys(data).forEach(key => {
-                allProducts.push({ id: key, ...data[key] });
-            });
-            
-            // Сортируем: новые сверху
             allProducts.reverse();
             renderProducts();
         });
 
-        // Отображение товаров
         window.renderProducts = function() {
             const catalog = document.getElementById('catalog');
             const typeFilter = document.getElementById('filter-type').value;
@@ -158,41 +154,39 @@
                 let matchType = (typeFilter === 'all') || (p.type === typeFilter);
                 let matchPrice = true;
                 const price = parseInt(p.price);
-                
                 if (priceFilter === 'cheap') matchPrice = price < 10000;
-                if (priceFilter === 'mid') matchPrice = price >= 10000 && price <= 20000;
-                if (priceFilter === 'expensive') matchPrice = price > 20000;
-
+                if (priceFilter === 'mid') matchPrice = price >= 10000 && price <= 25000;
+                if (priceFilter === 'expensive') matchPrice = price > 25000;
                 return matchType && matchPrice;
             });
 
             if(filtered.length === 0) {
-                catalog.innerHTML = '<div class="empty-state">Нічого не знайдено 😔</div>';
+                catalog.innerHTML = '<div class="empty-state">Об\'єктів не виявлено в цьому секторі.</div>';
                 return;
             }
 
             filtered.forEach(p => {
-                // Определяем стиль бейджа
-                let badgeClass = 'badge-work';
-                let badgeText = 'Office';
-                if(p.type === 'gaming') { badgeClass = 'badge-game'; badgeText = 'Gaming'; }
-                if(p.type === 'ultrabook') { badgeClass = 'badge-ultra'; badgeText = 'Ultra'; }
+                let badgeClass = 'badge-work'; let badgeText = 'Business';
+                if(p.type === 'gaming') { badgeClass = 'badge-game'; badgeText = 'Gaming Class'; }
+                if(p.type === 'ultrabook') { badgeClass = 'badge-ultra'; badgeText = 'Ultrabook'; }
 
                 const card = document.createElement('div');
-                card.className = 'product-card fade-in';
+                card.className = 'product-card';
                 card.innerHTML = `
                     <div class="card-image-container">
-                        <img src="${p.image || 'https://via.placeholder.com/300'}" class="product-img" onerror="this.src='https://via.placeholder.com/300?text=TEQRA'">
+                        <img src="${p.image}" class="product-img" onerror="this.src='https://placehold.co/600x400/1a1a2e/00f3ff?text=TEQRA+Unit'">
+                        <div class="card-overlay"></div>
                         <span class="badge ${badgeClass}">${badgeText}</span>
-                        ${admins.includes(tg.initDataUnsafe?.user?.id) ? 
-                        `<button class="delete-btn" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                        ${isAdmin ? `<button class="delete-btn" onclick="deleteProduct('${p.id}')"><i class="fas fa-times"></i></button>` : ''}
                     </div>
                     <div class="card-info">
                         <h3 class="product-title">${p.title}</h3>
-                        <p class="product-specs">${p.specs}</p>
+                        <div class="specs-container">
+                            <i class="fas fa-microchip"></i> <span>${p.specs}</span>
+                        </div>
                         <div class="price-row">
-                            <span class="price">${p.price} ₴</span>
-                            <button class="buy-btn" onclick="tg.sendData('Хочу купити: ${p.title}')">Купити</button>
+                            <span class="price">${p.price} <small>₴</small></span>
+                            <button class="buy-btn" onclick="tg.sendData('Запит на юніт: ${p.title}')">ЗАМОВИТИ</button>
                         </div>
                     </div>
                 `;
@@ -200,7 +194,6 @@
             });
         }
 
-        // Добавление (для Админов)
         window.addProduct = async function() {
             const title = document.getElementById('inp-title').value;
             const specs = document.getElementById('inp-specs').value;
@@ -208,37 +201,21 @@
             const type = document.getElementById('inp-type').value;
             const img = document.getElementById('inp-img').value;
 
-            if(!title || !price) {
-                tg.showAlert("⚠️ Вкажіть хоча б назву та ціну!");
-                return;
-            }
+            if(!title || !price) { tg.showAlert("⚠️ Введіть дані юніта!"); return; }
 
             try {
-                await push(productsRef, {
-                    title, specs, price, type, image: img,
-                    date: Date.now()
-                });
-                closeAddModal();
-                document.querySelectorAll('input').forEach(i => i.value = '');
-                tg.showAlert("✅ Успішно додано!");
-            } catch (e) {
-                tg.showAlert("Помилка: " + e.message);
-            }
+                await push(productsRef, { title, specs, price, type, image: img, date: Date.now() });
+                document.querySelectorAll('.admin-form input').forEach(i => i.value = '');
+                tg.showAlert("✅ Юніт успішно активовано в системі!");
+                toggleAdminPanel(); // Закриваємо панель після додавання
+            } catch (e) { tg.showAlert("Помилка системи: " + e.message); }
         }
 
-        // Удаление
         window.deleteProduct = async function(id) {
-            tg.showConfirm("Видалити цей ноутбук з бази?", async (ok) => {
-                if(ok) {
-                    const itemRef = ref(db, `laptops/${id}`);
-                    await remove(itemRef);
-                }
+            tg.showConfirm("Деактивувати цей юніт з бази даних?", async (ok) => {
+                if(ok) await remove(ref(db, `laptops/${id}`));
             });
         }
-
-        window.openAddModal = () => document.getElementById('add-modal').style.display = 'flex';
-        window.closeAddModal = () => document.getElementById('add-modal').style.display = 'none';
-        window.renderProducts = renderProducts;
     </script>
 </body>
 </html>
