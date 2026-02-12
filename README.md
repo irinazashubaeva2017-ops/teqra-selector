@@ -1,0 +1,2 @@
+# teqra-selector
+Инструмент 
