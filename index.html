@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TEQRA Selector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1 class="logo">TEQRA</h1>
+            <p class="subtitle">Smart Selection System</p>
+        </header>
+
+        <div id="question-container">
+            <h2 id="question-text">Для каких задач нужен ноутбук?</h2>
+            <div id="options">
+                <button class="option-btn" onclick="nextStep('work')">Работа / Учеба</button>
+                <button class="option-btn" onclick="nextStep('games')">Игры / Графика</button>
+                <button class="option-btn" onclick="nextStep('home')">Дом / Фильмы</button>
+            </div>
+        </div>
+
+        <div id="result" style="display:none;">
+            <h2>Твой идеальный выбор:</h2>
+            <p id="recommendation"></p>
+            <button class="option-btn" onclick="location.reload()">Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        function nextStep(choice) {
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            
+            const rec = document.getElementById('recommendation');
+            if(choice === 'work') rec.innerText = "Рекомендуем серию Dell Latitude. Надежность и автономность.";
+            if(choice === 'games') rec.innerText = "Твой выбор — Lenovo Legion или игровые серии Dell. Мощь и охлаждение.";
+            if(choice === 'home') rec.innerText = "Подойдут стильные модели Toshiba или тонкие ультрабуки.";
+        }
+    </script>
+</body>
+</html>
